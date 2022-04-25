@@ -9,7 +9,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.db.models import Min, Max
-
+import datetime
 user_name_set = []
 
 def read_last_row(name):
@@ -35,18 +35,15 @@ def save_user_status(request):
     if request.method == 'POST':
         # Do save data.
         # TODO: Validate the parameters.
-        serializer = UserSerializer(data=request.data, partial=True)
-        if serializer.is_valid():
+        serializer = UserSerializer(data=request.data)
+        result = serializer.is_valid()
+        if result:
             serializer.save()
-        return Response({"status": "OK"})
+        return Response({"result": result})
     elif request.method == 'GET':
         last_row = User.objects.last()
         serializer = UserSerializer(last_row)
         return Response(serializer.data)
-    else:
-        # Error
-        return Response({"status": "Failed"})
-
 
 @api_view(['GET'])
 def get_last_data(request, name):
@@ -69,8 +66,18 @@ def get_all_last_data(request):
     user_name_set = set(user_name_set)
 
     result = []
+    data_status = {'date':'', 'status':''}
+    result_dict = {}
     for username in user_name_set:
+        last_row_dict = read_last_row(username[0]) #{"id":8,"created":"2022-04-24T18:58:40.173538","name":"allen","status":"soso"}
+        data_status['status'] = last_row_dict['status']
+        data_status['date'] = last_row_dict['created']
+        result_dict[last_row_dict["name"]]= data_status
+        # print(result_dict)
         result.append(read_last_row(username[0]))
+    # print(result_dict)
+
+
     # TODO: Make result list to be json format.
 
-    return Response(result)
+    return Response(result_dict)
