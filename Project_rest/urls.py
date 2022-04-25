@@ -15,13 +15,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from VRserver.views import status_view
+from VRserver.views import *
 from display.views import last_data_view, all_data_view
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('status/', status_view, name='status'),
-    path('last_data/', last_data_view, name='last_data'),
+    path('save_user_status/', save_user_status, name='save_user_status'),
+    path('get_last_data/<str:name>', get_last_data, name='get_last_data'),
+    path('get_all_last_data/', get_all_last_data, name='get_all_last_data'),
     path('all_data/',all_data_view, name='all_data')
 ]
